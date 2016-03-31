@@ -36,7 +36,7 @@ class MyWorld {
     void linearSolve(double *_x, double *_x0, double _a, double _c);
     void setBoundary(double *_x);
     void setVelocityBoundary(double *_u, double *_v);
-
+	void set_bnd(int N, int b, double * x);
     int mNumCells;
     double mTimeStep;
     double mDiffusionCoef;
