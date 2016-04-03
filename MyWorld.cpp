@@ -95,7 +95,7 @@ void MyWorld::advectDensity(double *_d, double *_d0, double *_u, double *_v) {
             double t1 = y - j0;
             double t0 = 1 - t1;
             _d[IX(i,j)] = s0 * (t0 * _d0[IX(i0, j0)] + t1 * _d0[IX(i0,j1)])+ s1 * (t0 * _d0[IX(i1, j0)] + t1 * _d0[IX(i1,j1)]);
-	}
+		}
     }
     setBoundary(_d);
 }
@@ -106,7 +106,7 @@ void MyWorld::advectVelocity(double *_u, double *_v, double *_u0, double *_v0) {
 	double x, y, s0, t0, s1, t1;
 	int i0, j0, i1, j1;
 	for (int i = 1; i <= mNumCells; i++) {
-		for (int j = 1; j < mNumCells; j++) {
+		for (int j = 1; j <= mNumCells; j++) {
 			x = i - dt0*_u0[IX(i, j)];
 			y = j - dt0*_v0[IX(i, j)];
 			if (x < 0.5) {
@@ -134,44 +134,44 @@ void MyWorld::advectVelocity(double *_u, double *_v, double *_u0, double *_v0) {
 			_u[IX(i, j)] = s0*(t0*_u0[IX(i0, j0)] + t1*_u0[IX(i0, j1)]) + s1*(t0*_u0[IX(i1, j0)] + t1*_u0[IX(i1, j1)]);
 
 			//vertical
-			_v[IX(i,j)] = s0*(t0*_v0[IX(i0, j0)] + t1*_v0[IX(i0, j1)]) + s1*(t0*_v0[IX(i1, j0)] + t1*_v0[IX(i1, j1)]);
+			_v[IX(i, j)] = s0*(t0*_v0[IX(i0, j0)] + t1*_v0[IX(i0, j1)]) + s1*(t0*_v0[IX(i1, j0)] + t1*_v0[IX(i1, j1)]);
 		}
 	}
 	// TODO set boundaries for horizontal and vertical
-	set_bnd(mNumCells, 1, _u);
-	set_bnd(mNumCells, 2, _v);
+	setVelocityBoundary(_u, _v);
 }
 
 void MyWorld::project(double *_u, double *_v, double *_u0, double *_v0) {
    // TODO: Add projection code here
+	double * div = new double[(mNumCells + 2) * (mNumCells + 2)];
+	double * p = new double[(mNumCells + 2) * (mNumCells + 2)];
 	double h = 1.0 / mNumCells;
 	for (int i = 1; i <= mNumCells; i++) {
 		for (int j = 1; j <= mNumCells; j++) {
-			_v0[IX(i, j)] = -0.5*h*(_u[IX(i + 1, j)] - _u[IX(i - 1, j)] + _v[IX(i, j + 1)] - _v[IX(i, j - 1)]);
-			_u0[IX(i, j)];
+			div[IX(i, j)] = -0.5*h*(_u[IX(i + 1, j)] - _u[IX(i - 1, j)] + _v[IX(i, j + 1)] - _v[IX(i, j - 1)]);
+			p[IX(i, j)] = 0;
 		}
 	}
-	// TODO set boundaries things here
-	set_bnd(mNumCells, 0, _v0);
-	set_bnd(mNumCells, 0, _u0);
+	// set boundaries things here
+	setBoundary(p);
+	setBoundary(div);
 
 	for (int k = 0; k < 20; k++) {
-		for (int i = 1; i < mNumCells; i++) {
+		for (int i = 1; i <= mNumCells; i++) {
 			for (int j = 1; j <= mNumCells; j++) {
-				_u0[IX(i, j)] = (_v0[IX(i, j)] + _u0[IX(i - 1, j)] + _u0[IX(i + 1, j)] + _u0[IX(i, j - 1)] + _u0[IX(i, j - 1)] + _u0[IX(i, j + 1)]) / 4;
+				p[IX(i, j)] = (div[IX(i, j)] + p[IX(i - 1, j)] + p[IX(i + 1, j)] + p[IX(i, j - 1)] + p[IX(i, j + 1)]) / 4;
 			}
 		}
-		// TODO set boundaries things here
-		set_bnd(mNumCells, 0, _u0);
+		// set boundaries things here
+		setBoundary(p);
 	}
-	for (int i = 1; i < mNumCells; i++) {
-		for (int j = 1; j < mNumCells; j++) {
-			_u[IX(i, j)] -= 0.5*(_u0[IX(i + 1, j)] - _u0[IX(i - 1, j)]) / h;
-			_v[IX(i, j)] -= 0.5*(_u0[IX(i, j+1)] - _u0[IX(i, j-1)]) / h;
+	for (int i = 1; i <= mNumCells; i++) {
+		for (int j = 1; j <= mNumCells; j++) {
+			_u[IX(i, j)] -= 0.5*(p[IX(i + 1, j)] - p[IX(i - 1, j)]) / h;
+			_v[IX(i, j)] -= 0.5*(p[IX(i, j + 1)] - p[IX(i, j - 1)]) / h;
 		}
 	}
-	set_bnd(mNumCells, 1, _u);
-	set_bnd(mNumCells, 2, _v);
+	setVelocityBoundary(_u, _v);
 }
 
 void MyWorld::externalForces() {
