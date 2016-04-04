@@ -22,12 +22,20 @@ void MyWorld::initialize(int _numCells, double _timeStep, double _diffCoef, doub
     mPreV = new double[size];
     mDensity = new double[size];
     mPreDensity = new double[size];
+	densityColors = std::vector<double *>();
+	preDensityColors = std::vector<double *>();
+	for (int j = 0; j < 3; j++) {
+		densityColors.push_back(new double[size]);
+		preDensityColors.push_back(new double[size]);
+		for (int i = 0; i < size; i++) {
+			mU[i] = mPreU[i] = 0.0;
+			mV[i] = mPreV[i] = 0.0;
+			densityColors[j][i] = preDensityColors[j][i] = 0.0;
+		}
+	}
+	currColor = red;
     
-    for (int i = 0; i < size; i++) {
-        mU[i] = mPreU[i] = 0.0;
-        mV[i] = mPreV[i] = 0.0;
-        mDensity[i] = mPreDensity[i] = 0.0;
-    }            
+           
 }
 
 double MyWorld::getTimeStep() {
@@ -36,8 +44,39 @@ double MyWorld::getTimeStep() {
 
 void MyWorld::simulate() {
     velocityStep(mU, mV, mPreU, mPreV);
-    densityStep(mDensity, mPreDensity);
+	for (int i = 0; i < 3; i++) {
+		densityStep(densityColors[i], preDensityColors[i]);
+	}
+    
     externalForces();
+}
+
+MyWorld::ColorChannel MyWorld::getColor(){
+	return currColor;
+}
+
+void MyWorld::toggleColor(){
+	switch (currColor) {
+	case red:
+		currColor = green;
+		break;
+	case green:
+		currColor = blue;
+		break;
+	case blue:
+		currColor = red;
+		break;
+	}
+}
+
+int MyWorld::getColorIndex(){
+	if (currColor == red) {
+		return 0;
+	}
+	else if (currColor == green) {
+		return 1;
+	}
+	return 2;
 }
 
 void MyWorld::densityStep(double *_x, double *_x0) {

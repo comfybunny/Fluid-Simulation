@@ -150,6 +150,8 @@ void myGlutKeyboard(unsigned char key, int x, int y) {
         case 'v': // toggle between velocity view and density view
             viewVelocity = !viewVelocity;
             break;
+		case 'c': // toggle the color being drawn
+			mySimulator.toggleColor();
         default:
             break;
     }
@@ -246,18 +248,28 @@ void drawDensity() {
         for (int j = 0; j <= mySimulator.getNumCells(); j++) {
             double y = (j - 0.5) * h;
                 
-            double d00 = mySimulator.getDensity(IX(i, j));
-            double d01 = mySimulator.getDensity(IX(i, j+1));
-            double d10 = mySimulator.getDensity(IX(i+1, j));
-            double d11 = mySimulator.getDensity(IX(i+1, j+1));
+            double d00r = mySimulator.getDensity(0, IX(i, j));
+            double d01r = mySimulator.getDensity(0, IX(i, j+1));
+            double d10r = mySimulator.getDensity(0, IX(i+1, j));
+            double d11r = mySimulator.getDensity(0, IX(i+1, j+1));
 
-            glColor3d(d00, d00, d00); 
+			double d00g = mySimulator.getDensity(1, IX(i, j));
+			double d01g = mySimulator.getDensity(1, IX(i, j + 1));
+			double d10g = mySimulator.getDensity(1, IX(i + 1, j));
+			double d11g = mySimulator.getDensity(1, IX(i + 1, j + 1));
+
+			double d00b = mySimulator.getDensity(2, IX(i, j));
+			double d01b = mySimulator.getDensity(2, IX(i, j + 1));
+			double d10b = mySimulator.getDensity(2, IX(i + 1, j));
+			double d11b = mySimulator.getDensity(2, IX(i + 1, j + 1));
+
+            glColor3d(d00r, d00g, d00b); 
             glVertex3f(x, y, 0);
-            glColor3d(d10, d10, d10); 
+            glColor3d(d10r, d10g, d10b);
             glVertex3f(x + h, y, 0);            
-            glColor3d(d11, d11, d11); 
+            glColor3d(d11r, d11g, d11b);
             glVertex3f(x + h, y + h, 0);
-            glColor3d(d01, d01, d01); 
+            glColor3d(d01r, d01g, d01b);
             glVertex3f(x, y + h, 0);
         }
     }
